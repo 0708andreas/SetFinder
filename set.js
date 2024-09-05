@@ -164,18 +164,25 @@ function guess_color(img) {
   let hsv = new cv.Mat();
   cv.cvtColor(img, hsv, cv.COLOR_RGB2HSV);
   let crop_hsv = hsv.roi(new cv.Rect(20, 20, hsv.cols - 40, hsv.rows - 40));
+  let _float32 = new cv.Mat();
   // let reshaped = crop_hsv.reshape(3, crop_hsv.rows * crop_hsv.cols);
-  let float32 = new cv.Mat(crop_hsv.rows * crop_hsv.cols, 3, cv.CV_32F);
-  // crop_hsv.convertTo(float32, cv.CV_32F);
-  for (let y = 0; y < crop_hsv.rows; y++) {
-    for (let x = 0; x < crop_hsv.cols; x++) {
-      for (let z = 0; z < 3; z++) {
-        float32.floatPtr(y + x * crop_hsv.rows)[z] = crop_hsv.ucharPtr(y, x)[z];
-        // float32.data[(y + x * crop_hsv.rows) * float32.channels() + z] =
-        // crop_hsv.ucharPtr(y, x)[z];
-      }
-    }
-  }
+  crop_hsv.convertTo(_float32, cv.CV_32F);
+  let float32 = cv.matFromArray(
+    crop_hsv.rows * crop_hsv.cols,
+    3,
+    cv.CV_32F,
+    _float32.data32F,
+  );
+  // let float32 = new cv.Mat(crop_hsv.rows * crop_hsv.cols, 3, cv.CV_32F);
+  // for (let y = 0; y < crop_hsv.rows; y++) {
+  //   for (let x = 0; x < crop_hsv.cols; x++) {
+  //     for (let z = 0; z < 3; z++) {
+  //       float32.floatPtr(y + x * crop_hsv.rows)[z] = crop_hsv.ucharPtr(y, x)[z];
+  //       // float32.data[(y + x * crop_hsv.rows) * float32.channels() + z] =
+  //       // crop_hsv.ucharPtr(y, x)[z];
+  //     }
+  //   }
+  // }
 
   let K = 2;
   let labels = new cv.Mat();
@@ -285,7 +292,20 @@ function imshow(img) {
   cv.imshow("canvasOutput", img);
 }
 
+function random_color() {
+  let hsv = new cv.matFromArray(1, 1, cv.CV_8UC3, [
+    Math.round(Math.random() * 255),
+    255,
+    255,
+  ]);
+  let rgb = new cv.Mat();
+  cv.cvtColor(hsv, rgb, cv.COLOR_HSV2RGB);
+  let val = rgb.ucharPtr(0, 0);
+  return new cv.Scalar(val[0], val[1], val[2], 255);
+}
+
 function do_cv_magic() {
+  num_cards = document.getElementById("numCardsInput").value;
   let mat = cv.imread(imgElement);
   cv.imshow("canvasOutput", mat);
   mat.delete();
@@ -416,11 +436,13 @@ function do_cv_magic() {
 
   let sets = find_sets(transpose([counts, colors, shapes, fills]));
   for (let j = 0; j < sets.length; j++) {
-    let color = new cv.Scalar(
-      Math.round(Math.random() * 255),
-      Math.round(Math.random() * 255),
-      Math.round(Math.random() * 255),
-    );
+    let color = random_color();
+    // let color = new cv.Scalar(
+    //   Math.round(Math.random() * 255),
+    //   Math.round(Math.random() * 255),
+    //   Math.round(Math.random() * 255),
+    //   255,
+    // );
     // let color = new cv.Scalar(0, 255, 0);
     let set = sets[j];
     for (let k = 0; k < set.length; k++) {
@@ -435,7 +457,7 @@ function do_cv_magic() {
               vertices[i],
               vertices[(i + 1) % 4],
               color,
-              1,
+              sets.length - j,
               cv.LINE_AA,
               0,
             );
