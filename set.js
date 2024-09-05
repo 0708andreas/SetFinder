@@ -435,36 +435,45 @@ function do_cv_magic() {
   console.log(fills.map((i) => fill_names[i]));
 
   let sets = find_sets(transpose([counts, colors, shapes, fills]));
-  for (let j = 0; j < sets.length; j++) {
-    let color = random_color();
-    // let color = new cv.Scalar(
-    //   Math.round(Math.random() * 255),
-    //   Math.round(Math.random() * 255),
-    //   Math.round(Math.random() * 255),
-    //   255,
-    // );
-    // let color = new cv.Scalar(0, 255, 0);
-    let set = sets[j];
-    for (let k = 0; k < set.length; k++) {
-      let card = set[k];
-      for (let i = 0; i < num_cards; i++) {
-        if (array_equal(card, [counts[i], colors[i], shapes[i], fills[i]])) {
-          // console.log("Card nr. " + i + " is part of set nr. " + j);
-          let vertices = vert_list[i];
-          for (let i = 0; i < 4; i++) {
-            cv.line(
-              img,
-              vertices[i],
-              vertices[(i + 1) % 4],
-              color,
-              sets.length - j,
-              cv.LINE_AA,
-              0,
-            );
+  document.getElementById("canvasOutput").onclick = function (e) {
+    for (let j = 0; j < sets.length; j++) {
+      let color = random_color();
+      // let color = new cv.Scalar(
+      //   Math.round(Math.random() * 255),
+      //   Math.round(Math.random() * 255),
+      //   Math.round(Math.random() * 255),
+      //   255,
+      // );
+      // let color = new cv.Scalar(0, 255, 0);
+      let set = sets[j];
+      for (let k = 0; k < set.length; k++) {
+        let card = set[k];
+        for (let i = 0; i < num_cards; i++) {
+          if (array_equal(card, [counts[i], colors[i], shapes[i], fills[i]])) {
+            // console.log("Card nr. " + i + " is part of set nr. " + j);
+            let vertices = vert_list[i];
+            for (let i = 0; i < 4; i++) {
+              cv.line(
+                img,
+                vertices[i],
+                vertices[(i + 1) % 4],
+                color,
+                sets.length - j,
+                cv.LINE_AA,
+                0,
+              );
+            }
           }
         }
       }
     }
+    imshow(img);
+  };
+  if (sets.length > 0) {
+    document.getElementById("status").innerHTML =
+      "There is at least one set! Tap the picture to see them";
+  } else {
+    document.getElementById("status").innerHTML = "There is no set!";
   }
   // console.log(find_sets(transpose([counts, colors, shapes, fills])));
   imshow(img);
