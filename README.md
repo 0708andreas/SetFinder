@@ -1,6 +1,6 @@
 # SetFinder
 
-https://0708andreas.github.io/SetFinder/
+Demo: [https://0708andreas.github.io/SetFinder/]
 
 Dette er en web-app, der kan detektere, om der er et set i spillet [Set](https://www.setgame.com/sites/default/files/instructions/SET%20INSTRUCTIONS%20-%20DANISH.pdf).
 
